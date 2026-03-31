@@ -1269,11 +1269,10 @@ function NeverLose:CreateOptionWindow(Frame: Frame , Zindex)
 	UIStroke.Color = Color3.fromRGB(45, 48, 58)
 	UIStroke.Parent = OptionHandler
 
-	NeverLose:AddSignal(UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(LPH_NO_VIRTUALIZE(function()
+		local h = math.max(30, UIListLayout.AbsoluteContentSize.Y)
 		NeverLose.PlayAnimate(OptionHandler , SlowyTween , {
-			Size = UDim2.new(0, 220, 0, UIListLayout.AbsoluteContentSize.Y - 1)
+			Size = UDim2.new(0, 220, 0, h)
 		})
-	end)));
 
 	NeverLose:AddSignal(OptionHandler:GetPropertyChangedSignal('BackgroundTransparency'):Connect(LPH_NO_VIRTUALIZE(function()
 		if OptionHandler.BackgroundTransparency > 0.9 then
@@ -3831,7 +3830,37 @@ function NeverLose:RegisiterItem(Frame: Frame , Signel)
 		return UserFrameItem;
 	end;
 
-	return idx;
+		function idx:AddToggle(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddToggle(Config)
+		end;
+
+		function idx:AddSlider(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddSlider(Config)
+		end;
+
+		function idx:AddDropdown(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddDropdown(Config)
+		end;
+
+		function idx:AddKeybind(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddKeybind(Config)
+		end;
+
+		function idx:AddColorPicker(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddColorPicker(Config)
+		end;
+
+		function idx:AddTextInput(Config)
+			local h = NeverLose:RegisiterHandler(Frame, Signel)
+			return h:AddTextInput(Config)
+		end;
+
+		return idx;
 end;
 
 function NeverLose:CreateWindow(Config)
@@ -4816,8 +4845,9 @@ function NeverLose:CreateWindow(Config)
 		TabButton.BackgroundTransparency = 0.500
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TabButton.BorderSizePixel = 0
-		TabButton.Size = UDim2.new(1, -1, 0, 30)
+		TabButton.Size = UDim2.new(1, 0, 0, 30)
 		TabButton.ZIndex = 8
+		TabButton.BackgroundTransparency = 1 -- Start hidden
 
 		UICorner.CornerRadius = UDim.new(0, 6)
 		UICorner.Parent = TabButton
@@ -4853,6 +4883,7 @@ function NeverLose:CreateWindow(Config)
 		TabContentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		TabContentLabel.TextSize = 12.000
 		TabContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+		TabContentLabel.TextTransparency = 0.5
 
 		local TabFrame = Instance.new("Frame")
 		local LeftScroll = Instance.new("ScrollingFrame")
@@ -4971,6 +5002,7 @@ function NeverLose:CreateWindow(Config)
 		end);
 
 		table.insert(Window.Tabs,Tab);
+		LeftScrollingFrame.CanvasSize = UDim2.fromOffset(0,UIListLayout.AbsoluteContentSize.Y)
 
 		if Window.Tabs[Window.CurrentTab] == Tab then
 			Tab.SetValue(true)
@@ -5908,7 +5940,7 @@ function NeverLose:CreateWindow(Config)
 	function Window:SetAccount(Config)
 		Config = NeverLose:ProcessParams(Config , {
 			Profile = NeverLose.UserProfile,
-			Username = LocalPlayer.DisplayName,
+			Username = LocalPlayer.DisplayName or LocalPlayer.Name,
 			Expires = "Never",
 		});
 
@@ -5940,6 +5972,14 @@ function NeverLose:CreateWindow(Config)
 	end;
 
 	Window:SetAccount();
+
+	task.spawn(function()
+		task.wait(0.1)
+		if #Window.Tabs > 0 and Window.CurrentTab then
+			local t = Window.Tabs[Window.CurrentTab]
+			if t then t.SetValue(true) end
+		end
+	end)
 
 	NeverLose:AddSignal(UserInputService.InputBegan:Connect(LPH_NO_VIRTUALIZE(function(value,ISTYPING)
 		if value.KeyCode == Window.Keybind or value.KeyCode.Name == Window.Keybind then
