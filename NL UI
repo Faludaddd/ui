@@ -4435,7 +4435,7 @@ function NeverLose:CreateWindow(Config)
 	LineFrame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	LineFrame_2.BorderSizePixel = 0
 	LineFrame_2.Position = UDim2.new(0.5, 0, 0, 0)
-	LineFrame_2.Size = UDim2.new(1, -10, 0, 1)
+	LineFrame_2.Size = UDim2.new(1, 0, 0, 1)
 	LineFrame_2.ZIndex = 5
 
 	UserSettingButton.Name = NeverLose.RandomString();
@@ -4752,6 +4752,7 @@ function NeverLose:CreateWindow(Config)
 		SurfaceGui.PixelsPerStud = 40;
 		
 		Window.SurfaceGui = SurfaceGui;
+		NeverLose.Global3DPart = Part;
 		NeverLose.GlobalSurfaceGui = SurfaceGui;
 		
 		local PerfectScale = Vector2.new(1920 , 1080 + 300)
@@ -6777,6 +6778,21 @@ function NeverLose:Unload()
 	if not NeverLose.UnloadEnabled then
 		return;	
 	end;
+
+	if NeverLose.GlobalSurfaceGui then
+		NeverLose.GlobalSurfaceGui:Destroy()
+		NeverLose.GlobalSurfaceGui = nil
+	end
+
+	if NeverLose.GlobalAdGui then
+		NeverLose.GlobalAdGui:Destroy()
+		NeverLose.GlobalAdGui = nil
+	end
+
+	if NeverLose.Global3DPart then
+		NeverLose.Global3DPart:Destroy()
+		NeverLose.Global3DPart = nil
+	end
 
 	NeverLose.ScreenGui:Destroy();
 
