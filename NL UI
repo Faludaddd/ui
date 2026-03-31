@@ -4205,13 +4205,20 @@ function NeverLose:CreateWindow(Config)
 		MinBtn.Size = UDim2.new(0, 26, 0, 26)
 		MinBtn.BackgroundColor3 = Color3.fromRGB(30, 31, 38)
 		MinBtn.BorderSizePixel = 0
-		MinBtn.Text = "\226\128\148"
-		MinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-		MinBtn.TextSize = 14
-		MinBtn.Font = Enum.Font.GothamBold
+		MinBtn.Text = ""
 		MinBtn.AutoButtonColor = false
 		MinBtn.ZIndex = 16
 		Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
+
+		local MinIcon = Instance.new("ImageLabel")
+		MinIcon.Parent = MinBtn
+		MinIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+		MinIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+		MinIcon.Size = UDim2.new(0, 16, 0, 16)
+		MinIcon.BackgroundTransparency = 1
+		MinIcon.Image = "rbxassetid://118026365011536"
+		MinIcon.ImageColor3 = Color3.fromRGB(180, 180, 180)
+		MinIcon.ZIndex = 17
 
 		local ClsBtn = Instance.new("TextButton")
 		ClsBtn.Name = NeverLose.RandomString()
@@ -4219,13 +4226,20 @@ function NeverLose:CreateWindow(Config)
 		ClsBtn.Size = UDim2.new(0, 26, 0, 26)
 		ClsBtn.BackgroundColor3 = Color3.fromRGB(50, 25, 25)
 		ClsBtn.BorderSizePixel = 0
-		ClsBtn.Text = "\226\156\149"
-		ClsBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-		ClsBtn.TextSize = 14
-		ClsBtn.Font = Enum.Font.GothamBold
+		ClsBtn.Text = ""
 		ClsBtn.AutoButtonColor = false
 		ClsBtn.ZIndex = 16
 		Instance.new("UICorner", ClsBtn).CornerRadius = UDim.new(0, 6)
+
+		local ClsIcon = Instance.new("ImageLabel")
+		ClsIcon.Parent = ClsBtn
+		ClsIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+		ClsIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+		ClsIcon.Size = UDim2.new(0, 16, 0, 16)
+		ClsIcon.BackgroundTransparency = 1
+		ClsIcon.Image = "rbxassetid://110786993356448"
+		ClsIcon.ImageColor3 = Color3.fromRGB(255, 100, 100)
+		ClsIcon.ZIndex = 17
 
 		local _collapsed = false
 		NeverLose:AddSignal(MinBtn.MouseButton1Click:Connect(function()
