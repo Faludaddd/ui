@@ -220,20 +220,21 @@ local Library = {
     IsLightTheme = false,
     -- [REDESIGN] Refined dark palette with subtle cool tints for depth
     Scheme = {
-        BackgroundColor = Color3.fromRGB(5, 5, 5),
-        MainColor = Color3.fromRGB(15, 15, 20),
-        AccentColor = Color3.fromRGB(0, 150, 255),
-        OutlineColor = Color3.fromRGB(30, 30, 35),
-        FontColor = Color3.fromRGB(240, 240, 240),
-        Font = Font.fromEnum(Enum.Font.GothamMedium),
-
-        RedColor = Color3.fromRGB(245, 60, 60),
-        DestructiveColor = Color3.fromRGB(220, 45, 45),
-        DarkColor = Color3.fromRGB(2, 2, 2),
-        WhiteColor = Color3.new(1, 1, 1),
+        Font = Font.fromEnum(Enum.Font.Code),
+        FontColor = Color3.fromRGB(255, 255, 255),
+        MainColor = Color3.fromRGB(20, 20, 25), -- [V3] Kojo matte gray
+        AccentColor = Color3.fromRGB(255, 60, 150), -- [V3] Kojo pink
+        BackgroundColor = Color3.fromRGB(15, 15, 18), -- [V3] Darker inset
+        OutlineColor = Color3.fromRGB(45, 45, 55),
+        DarkColor = Color3.fromRGB(10, 10, 12),
+        WhiteColor = Color3.fromRGB(255, 255, 255),
     },
 
-    Registry = {},
+    Registry = {
+        Toggle = "AccentColor",
+        Slider = "AccentColor",
+        Checkbox = "AccentColor",
+    },
     Scales = {},
 
     ImageManager = CustomImageManager,
@@ -6362,7 +6363,7 @@ function Library:CreateWindow(WindowInfo)
 
         MainFrame = New("TextButton", {
             BackgroundColor3 = "BackgroundColor",
-            BackgroundTransparency = 1, -- [V2] Invisible wrapper
+            BackgroundTransparency = 0, -- [V3] Unified solid frame
             Name = "Main",
             Text = "",
             Position = WindowInfo.Position,
@@ -6383,22 +6384,14 @@ function Library:CreateWindow(WindowInfo)
                 Parent = MainFrame,
             })
         )
-        -- [V2] Removed Outline and Divider Lines to support floating aesthetic
-        local ContentBackground = New("Frame", {
-            BackgroundColor3 = function()
-                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
-            end,
-            Position = UDim2.fromOffset(0, 52), -- Space between header and content
-            Size = UDim2.new(1, 0, 1, -52),
+        
+        -- [V3] Thin Solid Window Outline
+        local BaseOutline = New("UIStroke", {
+            Color = "AccentColor", -- [V3] Kojo Hub pink outline
+            Thickness = 1,
             Parent = MainFrame,
         })
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
-                Parent = ContentBackground,
-            })
-        )
+        Library.Registry[BaseOutline].Color = "AccentColor"
 
         if WindowInfo.BackgroundImage then
             BackgroundImage = New("ImageLabel", {
@@ -6409,7 +6402,7 @@ function Library:CreateWindow(WindowInfo)
                 ZIndex = 999,
                 BackgroundTransparency = 1,
                 ImageTransparency = 0.75,
-                Parent = ContentBackground, -- [V2] Attach background image to content
+                Parent = MainFrame, -- [V3] Attach background image natively
             })
 
             table.insert(
@@ -6428,24 +6421,18 @@ function Library:CreateWindow(WindowInfo)
         --// Top Bar \\-
         local TopBar = New("Frame", {
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 44), -- [REDESIGN] Slightly more compact top bar
+            Size = UDim2.new(1, 0, 0, 44), -- [V3] Top bar holds title/search seamlessly
             Parent = MainFrame,
         })
         
-        local TopBarBackground = New("Frame", { -- [V2] Distinct TopBar floating module
-            BackgroundColor3 = function()
-                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
-            end,
-            Size = UDim2.fromScale(1, 1),
-            Parent = TopBar,
+        -- [V3] TopBarBackground Removed, as the window is unified
+
+        Library:MakeLine(MainFrame, {
+            Position = UDim2.fromOffset(0, 44),
+            Size = UDim2.new(1, 0, 0, 1),
+            ZIndex = 5,
         })
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
-                Parent = TopBarBackground,
-            })
-        )
+
         Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
@@ -6672,35 +6659,45 @@ function Library:CreateWindow(WindowInfo)
             Parent = ResizeButton,
         })
 
-        --// Tabs \\--
+        --// Left Sidebar (Icons Only) \\--
         Tabs = New("ScrollingFrame", {
-            AutomaticCanvasSize = Enum.AutomaticSize.X, -- [V2] Horizontal scroll
-            BackgroundTransparency = 1, -- [V2] Invisible background
+            AutomaticCanvasSize = Enum.AutomaticSize.Y, -- [V3] Vertical scroll
+            BackgroundTransparency = 1,
             CanvasSize = UDim2.fromScale(0, 0),
-            Position = UDim2.fromOffset(10, 56), -- [V2] Top of the content area
+            Position = UDim2.fromOffset(0, 45), -- [V3] Starts right below the top header line
             ScrollBarThickness = 0,
-            Size = UDim2.new(1, -20, 0, 40), -- [V2] Spanning the width
+            Size = UDim2.new(0, 56, 1, -45), -- [V3] Thin vertical sidebar
             Parent = MainFrame,
         })
         New("UIListLayout", {
-            FillDirection = Enum.FillDirection.Horizontal, -- [V2] Horizontal tab pills
-            Padding = UDim.new(0, 8),
+            FillDirection = Enum.FillDirection.Vertical, -- [V3] Vertical Icon Stack
+            Padding = UDim.new(0, 4),
+            HorizontalAlignment = Enum.HorizontalAlignment.Center,
             Parent = Tabs,
         })
 
-        --// Container \\--
+        -- [V3] Divider Line separating Left Sidebar from Main Container
+        DividerLine = New("Frame", {
+            BackgroundColor3 = "OutlineColor",
+            Position = UDim2.fromOffset(56, 45),
+            Size = UDim2.new(0, 1, 1, -45),
+            Parent = MainFrame,
+        })
+        Library.Registry[DividerLine].BackgroundColor3 = "OutlineColor"
+
+        --// Content Container \\--
         Container = New("Frame", {
-            BackgroundTransparency = 1, -- [V2] Invisible
+            BackgroundTransparency = 1,
             Name = "Container",
-            Position = UDim2.fromOffset(0, 100), -- [V2] Below tabs
-            Size = UDim2.new(1, 0, 1, -124), -- [V2] Full width
+            Position = UDim2.fromOffset(57, 45), -- [V3] Starts right of the Sidebar Divider
+            Size = UDim2.new(1, -57, 1, -69), -- [V3] Takes up the remaining window width (-Footer)
             Parent = MainFrame,
         })
         New("UIPadding", {
             PaddingBottom = UDim.new(0, 8),
             PaddingLeft = UDim.new(0, 12),
             PaddingRight = UDim.new(0, 12),
-            PaddingTop = UDim.new(0, 0),
+            PaddingTop = UDim.new(0, 8),
             Parent = Container,
         })
     end
@@ -6796,16 +6793,15 @@ function Library:CreateWindow(WindowInfo)
     end
 
     function Window:SetSidebarWidth(Width)
-        Width = math.clamp(Width, 48, MainFrame.Size.X.Offset - WindowInfo.MinContainerWidth - 1)
-
-        DividerLine.Position = UDim2.fromOffset(Width, 0)
+        -- [V3] Kojo Hub operates on a fixed thin Sidebar for Icons, compact logic natively.
+        Width = 56 
+        
+        DividerLine.Position = UDim2.fromOffset(Width, 45)
 
         TitleHolder.Size = UDim2.new(0, Width, 1, 0)
         RightWrapper.Size = UDim2.new(1, -Width - 57 - 1, 1, -16)
-        Tabs.Size = UDim2.new(0, Width, 1, -70)
-        Container.Size = UDim2.new(1, -Width - 1, 1, -70)
-
-        if WindowInfo.EnableCompacting then
+        Tabs.Size = UDim2.new(0, Width, 1, -45)
+        Container.Size = UDim2.new(1, -Width - 1, 1, -69) -- Leaves 24px footer
             ApplyCompact()
         end
         if not IsCompact then
@@ -6857,57 +6853,41 @@ function Library:CreateWindow(WindowInfo)
         Icon = Library:GetCustomIcon(Icon)
         do
              TabButton = New("TextButton", {
-                AutomaticSize = Enum.AutomaticSize.X, -- [V2] Size to text width
-                BackgroundColor3 = "MainColor",
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 0, 1, 0), -- [V2] Use full height of tab row (40px)
+                BackgroundColor3 = "AccentColor", -- [V3] Pink background when active
+                BackgroundTransparency = 1, -- Invisible default
+                Size = UDim2.new(1, 0, 0, 48), -- [V3] Stackable square button height
                 Text = "",
                 Parent = Tabs,
             })
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8), -- [V2] Pill-shaped buttons
-                Parent = TabButton,
-            })
-            ActiveIndicator = New("Frame", { -- [V2] Bottom active strip instead of side
-                BackgroundColor3 = "AccentColor",
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, -16, 0, 2),
-                AnchorPoint = Vector2.new(0.5, 1),
-                Position = UDim2.new(0.5, 0, 1, -2),
-                BackgroundTransparency = 1, -- Hidden by default
-                Parent = TabButton,
+            -- [V3] No UI Corner on the sidebar buttons in Kojo hub, completely flat!
+            ActiveIndicator = New("Frame", {
+                Visible = false -- [V3] Replaced bottom strip with full button background
             })
             local ButtonPadding = New("UIPadding", {
-                PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
-                PaddingLeft = UDim.new(0, IsCompact and 12 or 16),
-                PaddingRight = UDim.new(0, IsCompact and 12 or 16),
-                PaddingTop = UDim.new(0, IsCompact and 6 or 11),
+                PaddingBottom = UDim.new(0, 8),
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8),
+                PaddingTop = UDim.new(0, 8),
                 Parent = TabButton,
             })
 
+            -- [V3] Label disabled natively, it's an icon-only sidebar
             TabLabel = New("TextLabel", {
-                AutomaticSize = Enum.AutomaticSize.X,
-                BackgroundTransparency = 1,
-                Position = UDim2.fromOffset(Icon and 24 or 0, 0),
-                Size = UDim2.fromScale(0, 1),
-                Text = Name,
-                TextSize = 16,
-                TextTransparency = 0.55, -- [REDESIGN] Slightly fainter inactive text
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Visible = not IsCompact,
+                Visible = false,
                 Parent = TabButton,
             })
 
             if Icon then
                 TabIcon = New("ImageLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5), -- Center it
+                    Position = UDim2.fromScale(0.5, 0.5),
                     Image = Icon.Url,
-                    ImageColor3 = Icon.Custom and "WhiteColor" or "AccentColor",
+                    ImageColor3 = "FontColor",
                     ImageRectOffset = Icon.ImageRectOffset,
                     ImageRectSize = Icon.ImageRectSize,
                     ImageTransparency = 0.5,
                     ScaleType = Enum.ScaleType.Fit,
-                    Size = UDim2.fromScale(1, 1),
-                    SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,
+                    Size = UDim2.new(1, -8, 1, -8), -- Scale to fit safely
                     Parent = TabButton,
                 })
             end
@@ -7230,45 +7210,44 @@ function Library:CreateWindow(WindowInfo)
             local GroupboxList
 
             do
+            do
                 GroupboxHolder = New("Frame", {
-                    BackgroundColor3 = "MainColor", -- [V2] Soft floating card
+                    BackgroundTransparency = 1, -- [V3] Flat integrated look
                     Size = UDim2.fromScale(1, 0),
                     Parent = BoxHolder,
                 })
-                table.insert(
-                    Library.Corners,
-                    New("UICorner", {
-                        CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
-                        Parent = GroupboxHolder,
-                    })
-                )
-                -- [V2] Outlines and headers removed
+                
+                -- [V3] Sharp Outline for Groupboxes
+                Library:AddOutline(GroupboxHolder)
 
                 local BoxIcon = Library:GetCustomIcon(Info.IconName)
                 if BoxIcon then
                     New("ImageLabel", {
                         Image = BoxIcon.Url,
-                        ImageColor3 = BoxIcon.Custom and "WhiteColor" or "AccentColor",
+                        ImageColor3 = "AccentColor", -- [V3] Always pink accents
                         ImageRectOffset = BoxIcon.ImageRectOffset,
                         ImageRectSize = BoxIcon.ImageRectSize,
-                        Position = UDim2.fromOffset(6, 6),
-                        Size = UDim2.fromOffset(22, 22),
+                        Position = UDim2.fromOffset(0, 6),
+                        Size = UDim2.fromOffset(18, 18),
                         Parent = GroupboxHolder,
                     })
                 end
 
                 GroupboxLabel = New("TextLabel", {
                     BackgroundTransparency = 1,
-                    Position = UDim2.fromOffset(BoxIcon and 24 or 0, 0),
-                    Size = UDim2.new(1, 0, 0, 34),
-                    Text = Info.Name,
-                    TextSize = 15,
+                    Position = UDim2.fromOffset(BoxIcon and 22 or 0, 0),
+                    Size = UDim2.new(1, 0, 0, 30),
+                    Text = Info.Name:upper(), -- [V3] Uppercase for aesthetic
+                    TextSize = 13,
+                    TextColor3 = "AccentColor", -- [V3] Active pink text
                     TextXAlignment = Enum.TextXAlignment.Left,
                     Parent = GroupboxHolder,
                 })
+                Library.Registry[GroupboxLabel].TextColor3 = "AccentColor"
+                
                 New("UIPadding", {
-                    PaddingLeft = UDim.new(0, 12),
-                    PaddingRight = UDim.new(0, 12),
+                    PaddingLeft = UDim.new(0, 4),
+                    PaddingRight = UDim.new(0, 4),
                     Parent = GroupboxLabel,
                 })
 
@@ -7343,29 +7322,31 @@ function Library:CreateWindow(WindowInfo)
             local TabboxButtons
 
             do
+            do
                 TabboxHolder = New("Frame", {
-                    BackgroundColor3 = "MainColor", -- [V2] Soft floating card
+                    BackgroundTransparency = 1, -- [V3] Flat integrated
                     Size = UDim2.fromScale(1, 0),
                     Parent = BoxHolder,
                 })
-                table.insert(
-                    Library.Corners,
-                    New("UICorner", {
-                        CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
-                        Parent = TabboxHolder,
-                    })
-                )
-                -- [V2] Outline removed
+                
+                -- [V3] Sharp Outline for Tabboxes
+                Library:AddOutline(TabboxHolder)
 
                 TabboxButtons = New("Frame", {
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 34),
+                    Size = UDim2.new(1, 0, 0, 30),
                     Parent = TabboxHolder,
                 })
                 New("UIListLayout", {
                     FillDirection = Enum.FillDirection.Horizontal,
                     HorizontalFlex = Enum.UIFlexAlignment.Fill,
                     Parent = TabboxButtons,
+                })
+                
+                -- [V3] Separation line below tabbox buttons
+                Library:MakeLine(TabboxHolder, {
+                    Position = UDim2.fromOffset(0, 30),
+                    Size = UDim2.new(1, 0, 0, 1),
                 })
             end
 
@@ -7518,16 +7499,13 @@ function Library:CreateWindow(WindowInfo)
                         Tabbox.ActiveTab:Hide()
                     end
 
-                    Button.BackgroundTransparency = 1
-                    BottomCover.BackgroundTransparency = 1
-                    LeftCover.BackgroundTransparency = 1
-                    RightCover.BackgroundTransparency = 1
-
+                    Button.BackgroundTransparency = 0 -- [V3] Subtle background for active subtab
                     ButtonLabel.TextTransparency = 0
+                    ButtonLabel.TextColor3 = Library.Scheme.AccentColor
                     if ButtonIcon then
                         ButtonIcon.ImageTransparency = 0
+                        ButtonIcon.ImageColor3 = Library.Scheme.AccentColor
                     end
-                    Line.Visible = false
 
                     Container.Visible = true
 
@@ -7871,7 +7849,6 @@ function Library:CreateWindow(WindowInfo)
                 Callback(Box.Text)
             end)
         end
-
         function Tab:RefreshSides() end
         function Tab:Resize() end
         function Tab:UpdateCorners() end
@@ -7896,16 +7873,12 @@ function Library:CreateWindow(WindowInfo)
                 Library.ActiveTab:Hide()
             end
 
-            TweenService:Create(TabButton, Library.TweenInfo, {
-                BackgroundTransparency = 0,
-            }):Play()
+            TabButton.BackgroundTransparency = 0
             TweenService:Create(TabLabel, Library.TweenInfo, {
                 TextTransparency = 0,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
-                    ImageTransparency = 0,
-                }):Play()
+                TabIcon.ImageTransparency = 0
             end
             TabContainer.Visible = true
 
