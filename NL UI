@@ -6871,6 +6871,7 @@ function Library:CreateWindow(WindowInfo)
         end
 
         local TabButton: TextButton
+        local ActiveIndicator: Frame
         local TabLabel
         local TabIcon
 
@@ -6887,7 +6888,7 @@ function Library:CreateWindow(WindowInfo)
                 Text = "",
                 Parent = Tabs,
             })
-            local ActiveIndicator = New("Frame", { -- [REDESIGN] New active strip
+            ActiveIndicator = New("Frame", { -- [REDESIGN] New active strip
                 BackgroundColor3 = "AccentColor",
                 BorderSizePixel = 0,
                 Size = UDim2.new(0, 3, 1, 0),
