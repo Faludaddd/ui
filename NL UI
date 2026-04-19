@@ -214,22 +214,22 @@ local Library = {
     OriginalMinSize = Vector2.new(480, 360),
     MinSize = Vector2.new(480, 360),
     DPIScale = 1,
-    CornerRadius = 6, -- [REDESIGN] Increased for softer, more modern rounding
+    CornerRadius = 12,
     CornerRadiusDropdown = false, -- Temporary
 
     IsLightTheme = false,
     -- [REDESIGN] Refined dark palette with subtle cool tints for depth
     Scheme = {
-        BackgroundColor = Color3.fromRGB(12, 12, 14),
-        MainColor = Color3.fromRGB(22, 22, 26),
-        AccentColor = Color3.fromRGB(130, 90, 255),
-        OutlineColor = Color3.fromRGB(38, 38, 44),
-        FontColor = Color3.fromRGB(240, 240, 245),
-        Font = Font.fromEnum(Enum.Font.GothamMedium), -- [REDESIGN] Modern sans-serif font
+        BackgroundColor = Color3.fromRGB(5, 5, 5),
+        MainColor = Color3.fromRGB(15, 15, 20),
+        AccentColor = Color3.fromRGB(0, 150, 255),
+        OutlineColor = Color3.fromRGB(30, 30, 35),
+        FontColor = Color3.fromRGB(240, 240, 240),
+        Font = Font.fromEnum(Enum.Font.GothamMedium),
 
         RedColor = Color3.fromRGB(245, 60, 60),
         DestructiveColor = Color3.fromRGB(220, 45, 45),
-        DarkColor = Color3.new(0, 0, 0),
+        DarkColor = Color3.fromRGB(2, 2, 2),
         WhiteColor = Color3.new(1, 1, 1),
     },
 
@@ -1617,7 +1617,7 @@ function Library:AddDraggableButton(Text: string, Func, ExcludeScaling: boolean?
     local Table = {}
 
     local Button = New("TextButton", {
-        BackgroundColor3 = "BackgroundColor",
+        BackgroundColor3 = "MainColor", -- [V2] Floating utility card
         Position = UDim2.fromOffset(6, 6),
         TextSize = 16,
         ZIndex = 10,
@@ -1638,7 +1638,7 @@ function Library:AddDraggableButton(Text: string, Func, ExcludeScaling: boolean?
             })
         )
     end
-    Library:AddOutline(Button)
+    -- [V2] DraggableButton Outline removed
 
     Button.MouseButton1Click:Connect(function()
         Library:SafeCallback(Func, Table)
@@ -1661,7 +1661,7 @@ end
 function Library:AddDraggableMenu(Name: string)
     local Holder = New("Frame", {
         AutomaticSize = Enum.AutomaticSize.XY,
-        BackgroundColor3 = "BackgroundColor",
+        BackgroundColor3 = "MainColor", -- [V2] Floating card style
         Position = UDim2.fromOffset(6, 6),
         Size = UDim2.fromOffset(0, 0),
         ZIndex = 10,
@@ -1680,12 +1680,7 @@ function Library:AddDraggableMenu(Name: string)
             Parent = Holder,
         })
     )
-    Library:AddOutline(Holder)
-
-    Library:MakeLine(Holder, {
-        Position = UDim2.fromOffset(0, 34),
-        Size = UDim2.new(1, 0, 0, 1),
-    })
+    -- [V2] DraggableMenu Outline and header line stripped
 
     local Label = New("TextLabel", {
         BackgroundTransparency = 1,
@@ -1759,7 +1754,7 @@ function Library:AddContextMenu(
         Menu = New("ScrollingFrame", {
             AutomaticCanvasSize = List == 2 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
             AutomaticSize = List == 1 and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
-            BackgroundColor3 = "BackgroundColor",
+            BackgroundColor3 = "MainColor", -- [V2] Soft floating card background
             BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png",
             CanvasSize = UDim2.fromOffset(0, 0),
             ScrollBarImageColor3 = "OutlineColor",
@@ -1772,7 +1767,7 @@ function Library:AddContextMenu(
         })
     else
         Menu = New("Frame", {
-            BackgroundColor3 = "BackgroundColor",
+            BackgroundColor3 = "MainColor", -- [V2] Soft floating card
             Size = typeof(Size) == "function" and Size() or Size,
             Visible = false,
             ZIndex = 10,
@@ -1786,10 +1781,7 @@ function Library:AddContextMenu(
         })
     )
 
-    New("UIStroke", {
-        Color = "OutlineColor",
-        Parent = Menu,
-    })
+    -- [V2] Context Menu Stroke entirely removed
 
     if IgnoreCornerRadius ~= true then
         table.insert(
@@ -3827,7 +3819,7 @@ do
         })
 
         local Checkbox = New("Frame", {
-            BackgroundColor3 = "MainColor",
+            BackgroundColor3 = "BackgroundColor", -- [V2] Inset background
             Size = UDim2.fromScale(1, 1),
             SizeConstraint = Enum.SizeConstraint.RelativeYY,
             Parent = Button,
@@ -3839,11 +3831,7 @@ do
                 Parent = Checkbox,
             })
         )
-
-        local CheckboxStroke = New("UIStroke", {
-            Color = "OutlineColor",
-            Parent = Checkbox,
-        })
+        -- [V2] CheckboxStroke removed
 
         local CheckImage = New("ImageLabel", {
             Image = CheckIcon and CheckIcon.Url or "",
@@ -3865,7 +3853,7 @@ do
                 return
             end
 
-            CheckboxStroke.Transparency = Toggle.Disabled and 0.5 or 0
+            -- [V2] No stroke tracking
 
             if Toggle.Disabled then
                 Label.TextTransparency = 0.8
@@ -3884,8 +3872,8 @@ do
                 ImageTransparency = Toggle.Value and 0 or 1,
             }):Play()
 
-            Checkbox.BackgroundColor3 = Library.Scheme.MainColor
-            Library.Registry[Checkbox].BackgroundColor3 = "MainColor"
+            Checkbox.BackgroundColor3 = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.BackgroundColor
+            Library.Registry[Checkbox].BackgroundColor3 = Toggle.Value and "AccentColor" or "BackgroundColor"
         end
 
         function Toggle:OnChanged(Func)
@@ -4034,9 +4022,9 @@ do
 
         local Switch = New("Frame", {
             AnchorPoint = Vector2.new(1, 0),
-            BackgroundColor3 = "MainColor",
+            BackgroundColor3 = "BackgroundColor", -- [V2] Inset track color
             Position = UDim2.fromScale(1, 0),
-            Size = UDim2.fromOffset(34, 20), -- [REDESIGN] Wider/taller switch track
+            Size = UDim2.fromOffset(36, 20), -- [REDESIGN] Slightly wider for mac style
             Parent = Button,
         })
         New("UICorner", {
@@ -4050,10 +4038,7 @@ do
             PaddingTop = UDim.new(0, 2),
             Parent = Switch,
         })
-        local SwitchStroke = New("UIStroke", {
-            Color = "OutlineColor",
-            Parent = Switch,
-        })
+        -- [V2] Switch stroke removed
 
         local Ball = New("Frame", {
             BackgroundColor3 = "FontColor",
@@ -4078,13 +4063,13 @@ do
             local Offset = Toggle.Value and 1 or 0
 
             Switch.BackgroundTransparency = Toggle.Disabled and 0.75 or 0
-            SwitchStroke.Transparency = Toggle.Disabled and 0.75 or 0
+            -- [V2] SwitchStroke handling removed
 
-            Switch.BackgroundColor3 = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.MainColor
-            SwitchStroke.Color = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.OutlineColor
+            Switch.BackgroundColor3 = Toggle.Value and Library.Scheme.AccentColor or Library.Scheme.BackgroundColor
+            -- [V2] SwitchStroke handling removed
 
-            Library.Registry[Switch].BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
-            Library.Registry[SwitchStroke].Color = Toggle.Value and "AccentColor" or "OutlineColor"
+            Library.Registry[Switch].BackgroundColor3 = Toggle.Value and "AccentColor" or "BackgroundColor"
+            -- [V2] SwitchStroke handling removed
 
             if Toggle.Disabled then
                 Label.TextTransparency = 0.8
@@ -4253,7 +4238,7 @@ do
 
         local Box = New("TextBox", {
             AnchorPoint = Vector2.new(0, 1),
-            BackgroundColor3 = "MainColor",
+            BackgroundColor3 = "BackgroundColor", -- [V2] Inset soft background
             ClearTextOnFocus = not Input.Disabled and Input.ClearTextOnFocus,
             PlaceholderText = Input.Placeholder,
             Position = UDim2.fromScale(0, 1),
@@ -4273,10 +4258,7 @@ do
             Parent = Box,
         })
 
-        New("UIStroke", {
-            Color = "OutlineColor",
-            Parent = Box,
-        })
+        -- [V2] Input stroke removed
 
         table.insert(
             Library.Corners,
@@ -4446,23 +4428,31 @@ do
         local Bar = New("TextButton", {
             Active = not Slider.Disabled,
             AnchorPoint = Vector2.new(0, 1),
-            BackgroundColor3 = "MainColor",
+            BackgroundTransparency = 1, -- [V2] Invisible wrapper for hit-clicks
             Position = UDim2.fromScale(0, 1),
             Size = UDim2.new(1, 0, 0, 15),
             Text = "",
             Parent = Holder,
         })
 
-        New("UIStroke", {
-            Color = "OutlineColor",
+        local TrackLine = New("Frame", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            BackgroundColor3 = "BackgroundColor", -- [V2] Soft inset
+            Position = UDim2.new(0, 0, 0.5, 0),
+            Size = UDim2.new(1, 0, 0, 4), -- [V2] Thin modern rail
             Parent = Bar,
+        })
+        New("UICorner", {
+            CornerRadius = UDim.new(1, 0),
+            Parent = TrackLine,
         })
 
         local DisplayLabel = New("TextLabel", {
             BackgroundTransparency = 1,
+            Position = UDim2.new(0, 0, 0, -2), -- [V2] Slightly shifted up
             Size = UDim2.fromScale(1, 1),
             Text = "",
-            TextSize = 14,
+            TextSize = 13, -- [V2] Slightly smaller to fit floating rails
             ZIndex = 2,
             Parent = Bar,
         })
@@ -4476,21 +4466,14 @@ do
         local Fill = New("Frame", {
             BackgroundColor3 = "AccentColor",
             Size = UDim2.fromScale(0.5, 1),
-            Parent = Bar,
+            Parent = TrackLine, -- [V2] Parented to the 4px track
         })
 
+        -- [V2] Re-parent the rounding to the Fill track to ensure perfectly round pill ends
         table.insert(
             Library.Corners,
             New("UICorner", {
-                CornerRadius = UDim.new(0, Library.CornerRadius / 2),
-                Parent = Bar,
-            })
-        )
-
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, Library.CornerRadius / 2),
+                CornerRadius = UDim.new(1, 0),
                 Parent = Fill,
             })
         )
@@ -4739,7 +4722,7 @@ do
         local Display = New("TextButton", {
             Active = not Dropdown.Disabled,
             AnchorPoint = Vector2.new(0, 1),
-            BackgroundColor3 = "MainColor",
+            BackgroundColor3 = "BackgroundColor", -- [V2] Inset background
             Position = UDim2.fromScale(0, 1),
             Size = UDim2.new(1, 0, 0, 24), -- [REDESIGN] Dropdown display height
             Text = "---",
@@ -4755,10 +4738,7 @@ do
             Parent = Display,
         })
 
-        New("UIStroke", {
-            Color = "OutlineColor",
-            Parent = Display,
-        })
+        -- [V2] Dropdown Display Stroke removed
 
         if Library.CornerRadiusDropdown == true then
             table.insert(
@@ -6381,9 +6361,8 @@ function Library:CreateWindow(WindowInfo)
         Library.KeybindFrame.Visible = false
 
         MainFrame = New("TextButton", {
-            BackgroundColor3 = function()
-                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
-            end,
+            BackgroundColor3 = "BackgroundColor",
+            BackgroundTransparency = 1, -- [V2] Invisible wrapper
             Name = "Main",
             Text = "",
             Position = WindowInfo.Position,
@@ -6404,18 +6383,22 @@ function Library:CreateWindow(WindowInfo)
                 Parent = MainFrame,
             })
         )
-        Library:AddOutline(MainFrame)
-        Library:MakeLine(MainFrame, {
-            Position = UDim2.fromOffset(0, 44), -- [REDESIGN] Top bar separator
-            Size = UDim2.new(1, 0, 0, 1),
-        })
-
-        DividerLine = New("Frame", {
-            BackgroundColor3 = "OutlineColor",
-            Position = UDim2.fromOffset(InitialLeftWidth, 0),
-            Size = UDim2.new(0, 1, 1, -21),
+        -- [V2] Removed Outline and Divider Lines to support floating aesthetic
+        local ContentBackground = New("Frame", {
+            BackgroundColor3 = function()
+                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
+            end,
+            Position = UDim2.fromOffset(0, 52), -- Space between header and content
+            Size = UDim2.new(1, 0, 1, -52),
             Parent = MainFrame,
         })
+        table.insert(
+            Library.Corners,
+            New("UICorner", {
+                CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                Parent = ContentBackground,
+            })
+        )
 
         if WindowInfo.BackgroundImage then
             BackgroundImage = New("ImageLabel", {
@@ -6426,7 +6409,7 @@ function Library:CreateWindow(WindowInfo)
                 ZIndex = 999,
                 BackgroundTransparency = 1,
                 ImageTransparency = 0.75,
-                Parent = MainFrame,
+                Parent = ContentBackground, -- [V2] Attach background image to content
             })
 
             table.insert(
@@ -6448,6 +6431,21 @@ function Library:CreateWindow(WindowInfo)
             Size = UDim2.new(1, 0, 0, 44), -- [REDESIGN] Slightly more compact top bar
             Parent = MainFrame,
         })
+        
+        local TopBarBackground = New("Frame", { -- [V2] Distinct TopBar floating module
+            BackgroundColor3 = function()
+                return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
+            end,
+            Size = UDim2.fromScale(1, 1),
+            Parent = TopBar,
+        })
+        table.insert(
+            Library.Corners,
+            New("UICorner", {
+                CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                Parent = TopBarBackground,
+            })
+        )
         Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
@@ -6624,20 +6622,7 @@ function Library:CreateWindow(WindowInfo)
         end
 
         --// Bottom Bar \\--
-        BottomBackground = New("Frame", {
-            AnchorPoint = Vector2.new(0, 1),
-            BackgroundColor3 = function()
-                return Library:GetBetterColor(Library.Scheme.BackgroundColor, 4)
-            end,
-            Position = UDim2.fromScale(0, 1),
-            Size = UDim2.new(1, 0, 0, 24 + WindowInfo.CornerRadius), -- [REDESIGN] Taller footer
-            Parent = MainFrame
-        })
-        Library:MakeLine(MainFrame, {
-            AnchorPoint = Vector2.new(0, 1),
-            Position = UDim2.new(0, 0, 1, -24), -- [REDESIGN] Footer line position
-            Size = UDim2.new(1, 0, 0, 1),
-        })
+        -- [V2] BottomBackground & horizontal line removed. Footer sits cleanly on ContentBackground geometry.
 
         local BottomBar = New("Frame", {
             AnchorPoint = Vector2.new(0, 1),
@@ -6646,13 +6631,6 @@ function Library:CreateWindow(WindowInfo)
             Size = UDim2.new(1, 0, 0, 24), -- [REDESIGN] Footer height
             Parent = MainFrame,
         })
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
-                Parent = BottomBackground,
-            })
-        )
 
         --// Footer
         FooterLabel = New("TextLabel", {
@@ -6696,33 +6674,32 @@ function Library:CreateWindow(WindowInfo)
 
         --// Tabs \\--
         Tabs = New("ScrollingFrame", {
-            AutomaticCanvasSize = Enum.AutomaticSize.Y,
-            BackgroundColor3 = "BackgroundColor",
+            AutomaticCanvasSize = Enum.AutomaticSize.X, -- [V2] Horizontal scroll
+            BackgroundTransparency = 1, -- [V2] Invisible background
             CanvasSize = UDim2.fromScale(0, 0),
-            Position = UDim2.fromOffset(0, 49),
+            Position = UDim2.fromOffset(10, 56), -- [V2] Top of the content area
             ScrollBarThickness = 0,
-            Size = UDim2.new(0, InitialLeftWidth, 1, -70),
+            Size = UDim2.new(1, -20, 0, 40), -- [V2] Spanning the width
             Parent = MainFrame,
         })
         New("UIListLayout", {
+            FillDirection = Enum.FillDirection.Horizontal, -- [V2] Horizontal tab pills
+            Padding = UDim.new(0, 8),
             Parent = Tabs,
         })
 
         --// Container \\--
         Container = New("Frame", {
-            AnchorPoint = Vector2.new(1, 0),
-            BackgroundColor3 = function()
-                return Library:GetBetterColor(Library.Scheme.BackgroundColor, 1)
-            end,
+            BackgroundTransparency = 1, -- [V2] Invisible
             Name = "Container",
-            Position = UDim2.new(1, 0, 0, 49),
-            Size = UDim2.new(1, -InitialLeftWidth - 1, 1, -70),
+            Position = UDim2.fromOffset(0, 100), -- [V2] Below tabs
+            Size = UDim2.new(1, 0, 1, -124), -- [V2] Full width
             Parent = MainFrame,
         })
         New("UIPadding", {
-            PaddingBottom = UDim.new(0, 0),
-            PaddingLeft = UDim.new(0, 6),
-            PaddingRight = UDim.new(0, 6),
+            PaddingBottom = UDim.new(0, 8),
+            PaddingLeft = UDim.new(0, 12),
+            PaddingRight = UDim.new(0, 12),
             PaddingTop = UDim.new(0, 0),
             Parent = Container,
         })
@@ -6769,9 +6746,7 @@ function Library:CreateWindow(WindowInfo)
         Library.CornerRadius = Radius
         WindowInfo.CornerRadius = Radius
 
-        ResizeButton.Position = UDim2.new(1, -Radius / 4, 0, 0)
-        BottomBackground.Size = UDim2.new(1, 0, 0, 20 + Radius)
-
+        ResizeButton.Position = UDim2.new(1, -Radius / 4, 0, 0)        -- [V2] Footer is now fully integrated with Content layer, removed extraneous geometry
         for _, Tab in Library.Tabs do
             if Tab.IsKeyTab then
                 continue
@@ -6873,7 +6848,7 @@ function Library:CreateWindow(WindowInfo)
         local TabButton: TextButton
         local ActiveIndicator: Frame
         local TabLabel
-        local TabIcon
+        local TabIconi
 
         local TabContainer
         local TabLeft
@@ -6882,32 +6857,39 @@ function Library:CreateWindow(WindowInfo)
         Icon = Library:GetCustomIcon(Icon)
         do
              TabButton = New("TextButton", {
+                AutomaticSize = Enum.AutomaticSize.X, -- [V2] Size to text width
                 BackgroundColor3 = "MainColor",
                 BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, 40),
+                Size = UDim2.new(0, 0, 1, 0), -- [V2] Use full height of tab row (40px)
                 Text = "",
                 Parent = Tabs,
             })
-            ActiveIndicator = New("Frame", { -- [REDESIGN] New active strip
+            New("UICorner", {
+                CornerRadius = UDim.new(0, 8), -- [V2] Pill-shaped buttons
+                Parent = TabButton,
+            })
+            ActiveIndicator = New("Frame", { -- [V2] Bottom active strip instead of side
                 BackgroundColor3 = "AccentColor",
                 BorderSizePixel = 0,
-                Size = UDim2.new(0, 3, 1, 0),
-                Position = UDim2.fromScale(0, 0),
+                Size = UDim2.new(1, -16, 0, 2),
+                AnchorPoint = Vector2.new(0.5, 1),
+                Position = UDim2.new(0.5, 0, 1, -2),
                 BackgroundTransparency = 1, -- Hidden by default
                 Parent = TabButton,
             })
             local ButtonPadding = New("UIPadding", {
                 PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
-                PaddingLeft = UDim.new(0, IsCompact and 6 or 12),
-                PaddingRight = UDim.new(0, IsCompact and 6 or 12),
+                PaddingLeft = UDim.new(0, IsCompact and 12 or 16),
+                PaddingRight = UDim.new(0, IsCompact and 12 or 16),
                 PaddingTop = UDim.new(0, IsCompact and 6 or 11),
                 Parent = TabButton,
             })
 
             TabLabel = New("TextLabel", {
+                AutomaticSize = Enum.AutomaticSize.X,
                 BackgroundTransparency = 1,
-                Position = UDim2.fromOffset(30, 0),
-                Size = UDim2.new(1, -30, 1, 0),
+                Position = UDim2.fromOffset(Icon and 24 or 0, 0),
+                Size = UDim2.fromScale(0, 1),
                 Text = Name,
                 TextSize = 16,
                 TextTransparency = 0.55, -- [REDESIGN] Slightly fainter inactive text
@@ -7249,7 +7231,7 @@ function Library:CreateWindow(WindowInfo)
 
             do
                 GroupboxHolder = New("Frame", {
-                    BackgroundColor3 = "BackgroundColor",
+                    BackgroundColor3 = "MainColor", -- [V2] Soft floating card
                     Size = UDim2.fromScale(1, 0),
                     Parent = BoxHolder,
                 })
@@ -7260,12 +7242,7 @@ function Library:CreateWindow(WindowInfo)
                         Parent = GroupboxHolder,
                     })
                 )
-                Library:AddOutline(GroupboxHolder)
-
-                Library:MakeLine(GroupboxHolder, {
-                    Position = UDim2.fromOffset(0, 34),
-                    Size = UDim2.new(1, 0, 0, 1),
-                })
+                -- [V2] Outlines and headers removed
 
                 local BoxIcon = Library:GetCustomIcon(Info.IconName)
                 if BoxIcon then
@@ -7367,7 +7344,7 @@ function Library:CreateWindow(WindowInfo)
 
             do
                 TabboxHolder = New("Frame", {
-                    BackgroundColor3 = "BackgroundColor",
+                    BackgroundColor3 = "MainColor", -- [V2] Soft floating card
                     Size = UDim2.fromScale(1, 0),
                     Parent = BoxHolder,
                 })
@@ -7378,7 +7355,7 @@ function Library:CreateWindow(WindowInfo)
                         Parent = TabboxHolder,
                     })
                 )
-                Library:AddOutline(TabboxHolder)
+                -- [V2] Outline removed
 
                 TabboxButtons = New("Frame", {
                     BackgroundTransparency = 1,
@@ -7500,11 +7477,7 @@ function Library:CreateWindow(WindowInfo)
                     Parent = ButtonContent,
                 })
 
-                local Line = Library:MakeLine(Button, {
-                    AnchorPoint = Vector2.new(0, 1),
-                    Position = UDim2.new(0, 0, 1, 1),
-                    Size = UDim2.new(1, 0, 0, 1),
-                })
+                -- [V2] Line separator removed to blend tab into the floating card
 
                 local Container = New("Frame", {
                     BackgroundTransparency = 1,
